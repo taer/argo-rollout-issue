@@ -1,0 +1,99 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: httpbin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin
+  strategy:
+    canary:
+      steps:
+        - setWeight: 50
+        - pause: { duration: 1m }
+      canaryService: httpbin-canary
+      stableService: httpbin
+      trafficRouting:
+        istio:
+          virtualService:
+            name: httpbin
+
+  template:
+    metadata:
+      labels:
+        app: httpbin
+    spec:
+      containers:
+      - image: docker.io/kong/httpbin
+        resources: {}
+        imagePullPolicy: IfNotPresent
+        name: httpbin
+        # Same as found in Dockerfile's CMD but using an unprivileged port
+        command:
+        - gunicorn
+        - -b
+        - 0.0.0.0:8080
+        - httpbin:app
+        - -k
+        - gevent
+        env:
+        # Tells pipenv to use a writable directory instead of $HOME
+        - name: WORKON_HOME
+          value: /tmp
+        - name: CHANGEME
+          value: a
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: httpbin
+spec:
+  hosts:
+    - httpbin
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: httpbin
+          weight: 100
+        - destination:
+            host: httpbin-canary
+          weight: 0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+  labels:
+    app: httpbin
+    service: httpbin
+spec:
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8080
+  selector:
+    app: httpbin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin-canary
+  labels:
+    app: httpbin
+    service: httpbin
+spec:
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8080
+  selector:
+    app: httpbin
