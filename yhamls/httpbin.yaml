@@ -26,7 +26,7 @@ spec:
         app: httpbin
     spec:
       containers:
-      - image: docker.io/kong/httpbin
+      - image: docker.io/kong/httpbin:0.1.0
         resources: {}
         imagePullPolicy: IfNotPresent
         name: httpbin
