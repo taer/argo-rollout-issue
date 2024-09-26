@@ -9,16 +9,16 @@ spec:
     matchLabels:
       app: httpbin
   strategy:
-    canary:
-      steps:
-        - setWeight: 50
-        - pause: { duration: 1m }
-      canaryService: httpbin-canary
-      stableService: httpbin
-      trafficRouting:
-        istio:
-          virtualService:
-            name: httpbin
+    canary: {}
+#      steps:
+#        - setWeight: 50
+#        - pause: { duration: 1m }
+#      canaryService: httpbin-canary
+#      stableService: httpbin
+#      trafficRouting:
+#        istio:
+#          virtualService:
+#            name: httpbin
 
   template:
     metadata:
