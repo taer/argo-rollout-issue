@@ -70,6 +70,13 @@ spec:
         - destination:
             host: httpbin-canary
           weight: 0
+    - match:
+        - uri:
+            prefix: /headersasd
+      name: second
+      route:
+        - destination:
+            host: httpbin
 ---
 apiVersion: v1
 kind: Service
