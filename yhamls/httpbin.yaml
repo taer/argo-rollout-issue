@@ -45,7 +45,7 @@ spec:
         - name: WORKON_HOME
           value: /tmp
         - name: CHANGEME
-          value: aaaaqa
+          value: aaaa
         ports:
         - containerPort: 8080
           name: http
